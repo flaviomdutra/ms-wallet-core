@@ -28,12 +28,14 @@ func (h *WebAccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request
 	output, err := h.CreateAccountUseCase.Execute(dto)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(output)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
