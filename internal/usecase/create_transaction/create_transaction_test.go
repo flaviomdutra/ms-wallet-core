@@ -1,37 +1,16 @@
 package createtransaction
 
 import (
+	"context"
 	"testing"
 
 	"github.com/flaviomdutra/ms-wallet-core/internal/entity"
 	"github.com/flaviomdutra/ms-wallet-core/internal/event"
+	"github.com/flaviomdutra/ms-wallet-core/internal/usecase/mocks"
 	"github.com/flaviomdutra/ms-wallet-core/pkg/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
-type TransactionGatewayMock struct {
-	mock.Mock
-}
-
-func (m *TransactionGatewayMock) Create(transaction *entity.Transaction) error {
-	args := m.Called(transaction)
-	return args.Error(0)
-}
-
-type AccountGatewayMock struct {
-	mock.Mock
-}
-
-func (m *AccountGatewayMock) Save(account *entity.Account) error {
-	args := m.Called(account)
-	return args.Error(0)
-}
-
-func (m *AccountGatewayMock) FindByID(id string) (*entity.Account, error) {
-	args := m.Called(id)
-	return args.Get(0).(*entity.Account), args.Error(1)
-}
 
 func TestCreateTransactionUseCaseExecute(t *testing.T) {
 	clientFrom, _ := entity.NewClient("Jack Reacher", "jack.reacher@email.com")
@@ -43,11 +22,10 @@ func TestCreateTransactionUseCaseExecute(t *testing.T) {
 	accountFrom.Credit(1000)
 	accountTo.Credit(1000)
 
-	mockAccount := &AccountGatewayMock{}
-	mockAccount.On("FindByID", accountFrom.ID).Return(accountFrom, nil)
-	mockAccount.On("FindByID", accountTo.ID).Return(accountTo, nil)
+	mockUow := &mocks.UowMock{}
+	mockUow.On("Do", mock.Anything, mock.Anything).Return(nil)
 
-	mockTransaction := &TransactionGatewayMock{}
+	mockTransaction := &mocks.TransactionGatewayMock{}
 	mockTransaction.On("Create", mock.Anything).Return(nil)
 
 	input := CreateTransactionInputDTO{
@@ -58,16 +36,13 @@ func TestCreateTransactionUseCaseExecute(t *testing.T) {
 
 	dispatcher := events.NewEventDispatcher()
 	event := event.NewTransactionCreated()
-	uc := NewCreateTransactionUseCase(mockTransaction, mockAccount, dispatcher, event)
-	output, err := uc.Execute(input)
+	ctx := context.Background()
+
+	uc := NewCreateTransactionUseCase(mockUow, dispatcher, event)
+	output, err := uc.Execute(ctx, input)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
-	assert.NotEmpty(t, output.ID)
-
-	mockAccount.AssertExpectations(t)
-	mockTransaction.AssertExpectations(t)
-
-	mockAccount.AssertNumberOfCalls(t, "FindByID", 2)
-	mockTransaction.AssertNumberOfCalls(t, "Create", 1)
+	mockUow.AssertExpectations(t)
+	mockUow.AssertNumberOfCalls(t, "Do", 1)
 }
