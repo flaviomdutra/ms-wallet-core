@@ -3,7 +3,7 @@ Content-Type: application/json
 
 {
     "name": "Jane Doe",
-    "email": "jane@j.com"
+    "email": "Jane@reacher.com"
 }
 
 ###
@@ -12,7 +12,7 @@ POST http://localhost:3000/accounts HTTP/1.1
 Content-Type: application/json
 
 {
-    "client_id": "ad122166-5a59-41aa-a7c4-38b41af366e8"
+    "client_id": "e80b5d39-858a-4356-8d16-9407cec05c90"
 }
 
 ###
@@ -21,7 +21,7 @@ POST http://localhost:3000/transactions HTTP/1.1
 Content-Type: application/json
 
 {
-    "account_id_from": "ac8a7aff-bb00-4a87-ae71-ec0fb0e2f356",
-    "account_id_to": "74f2f676-6104-43fa-8e3d-6b4814153f19",
-    "amount": 50
+    "account_id_from": "d8805595-6213-4f20-bc1b-b7f49abd3c50",
+    "account_id_to": "f657a60e-584f-4089-bd8d-32020e68a2d2",
+    "amount": 150
 }
